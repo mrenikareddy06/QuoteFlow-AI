@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>QuoteFlow AI</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Chart.js for graphs -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- ═══════════════════════════ HEADER ═══════════════════════════ -->
+<header>
+  <div class="header-left">
+    <span class="live-dot"></span>
+    <h1>QuoteFlow <span class="accent">AI</span></h1>
+    <span class="tagline">Autonomous Quote Agent Pipeline</span>
+  </div>
+  <div class="header-right">
+    <div class="stat-pill">
+      <span class="stat-label">Processed</span>
+      <span class="stat-val" id="hdr-total">0</span>
+    </div>
+    <div class="stat-pill">
+      <span class="stat-label">Avg Bind</span>
+      <span class="stat-val" id="hdr-bind">0%</span>
+    </div>
+    <div class="stat-pill escalate-pill">
+      <span class="stat-label">Escalations</span>
+      <span class="stat-val" id="hdr-esc">0</span>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════════════════ TABS ════════════════════════════ -->
+<nav class="tabs">
+  <button class="tab active" onclick="showTab('dashboard')">Dashboard</button>
+  <button class="tab"        onclick="showTab('process')">Process Quote</button>
+  <button class="tab"        onclick="showTab('escalation')">Escalation Queue</button>
+  <button class="tab"        onclick="showTab('about')">How It Works</button>
+</nav>
+
+<!-- ═══════════════════════ DASHBOARD TAB ════════════════════════ -->
+<div id="tab-dashboard" class="tab-content active">
+
+  <!-- Quick actions -->
+  <div class="action-bar">
+    <button class="btn btn-cyan" onclick="loadDemo()">Run Demo Quote</button>
+    <button class="btn btn-purple" onclick="runBatch(10)">Batch Demo (10)</button>
+    <button class="btn btn-outline" onclick="refreshDashboard()">Refresh</button>
+  </div>
+
+  <!-- Charts row -->
+  <div class="charts-row">
+    <div class="chart-card">
+      <div class="card-title">Risk Distribution</div>
+      <canvas id="riskChart"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="card-title">Routing Decisions</div>
+      <canvas id="routingChart"></canvas>
+    </div>
+    <div class="chart-card wide">
+      <div class="card-title">Recent Bind Scores</div>
+      <canvas id="bindChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Recent quotes feed -->
+  <div class="card">
+    <div class="card-title">Live Quote Feed</div>
+    <div class="table-wrap">
+      <table id="feed-table">
+        <thead>
+          <tr>
+            <th>Quote ID</th>
+            <th>Region</th>
+            <th>Agent</th>
+            <th>Risk</th>
+            <th>Bind Score</th>
+            <th>Premium Flag</th>
+            <th>Decision</th>
+          </tr>
+        </thead>
+        <tbody id="feed-body">
+          <tr><td colspan="7" class="empty-msg">Run a demo to see quotes appear here</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════ PROCESS QUOTE TAB ═══════════════════════ -->
+<div id="tab-process" class="tab-content">
+  <div class="two-col">
+
+    <!-- Form -->
+    <div class="card">
+      <div class="card-title">Submit Quote</div>
+      <div class="form-grid">
+
+        <div class="field">
+          <label>Quote ID</label>
+          <input type="text" id="f-quote-id" value="AQ-TEST-001" />
+        </div>
+        <div class="field">
+          <label>Agent Type</label>
+          <select id="f-agent-type">
+            <option>EA</option><option>IA</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Region</label>
+          <select id="f-region">
+            <option>A</option><option>B</option><option>C</option>
+            <option>D</option><option>E</option><option>F</option>
+            <option>G</option><option>H</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Policy Type</label>
+          <select id="f-policy-type">
+            <option>Car</option><option>Van</option><option>Truck</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Driver Age</label>
+          <input type="number" id="f-driver-age" value="35" min="18" max="65"/>
+        </div>
+        <div class="field">
+          <label>Driving Experience (yrs)</label>
+          <input type="number" id="f-driving-exp" value="10" min="1" max="48"/>
+        </div>
+        <div class="field">
+          <label>Prev Accidents</label>
+          <select id="f-prev-acc">
+            <option value="0">0</option><option value="1">1</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Prev Citations</label>
+          <select id="f-prev-cit">
+            <option value="0">0</option><option value="1">1</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>HH Vehicles</label>
+          <input type="number" id="f-hh-veh" value="1" min="1" max="5"/>
+        </div>
+        <div class="field">
+          <label>HH Drivers</label>
+          <input type="number" id="f-hh-drv" value="1" min="1" max="5"/>
+        </div>
+        <div class="field">
+          <label>Salary Range</label>
+          <select id="f-sal">
+            <option>&lt;= $ 25 K</option>
+            <option>&gt; $ 25 K &lt;= $ 40 K</option>
+            <option>&gt; $ 40 K &lt;= $ 60 K</option>
+            <option>&gt; $ 60 K &lt;= $ 90 K</option>
+            <option>&gt; $ 90 K</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Coverage</label>
+          <select id="f-coverage">
+            <option>Basic</option><option>Balanced</option><option>Enhanced</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Vehicle Usage</label>
+          <select id="f-veh-usage">
+            <option>Commute</option><option>Pleasure</option><option>Business</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Annual Miles</label>
+          <select id="f-miles">
+            <option>&lt;= 7.5 K</option>
+            <option>&gt; 7.5 K &amp; &lt;= 15 K</option>
+            <option>&gt; 15 K &amp; &lt;= 25 K</option>
+            <option>&gt; 25 K &amp; &lt;= 35 K</option>
+            <option>&gt; 35 K &amp; &lt;= 45 K</option>
+            <option>&gt; 45 K &amp; &lt;= 55 K</option>
+            <option>&gt; 55 K</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Vehicle Cost</label>
+          <select id="f-vcost">
+            <option>&lt;= $ 10 K</option>
+            <option>&gt; $ 10 K &lt;= $ 20 K</option>
+            <option>&gt; $ 20 K &lt;= $ 30 K</option>
+            <option>&gt; $ 30 K &lt;= $ 40 K</option>
+            <option>&gt; $ 40 K</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Re-Quote?</label>
+          <select id="f-requote">
+            <option>No</option><option>Yes</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Quoted Premium ($)</label>
+          <input type="number" id="f-premium" value="750" min="600" max="950"/>
+        </div>
+        <div class="field">
+          <label>Gender</label>
+          <select id="f-gender">
+            <option>Male</option><option>Female</option>
+          </select>
+        </div>
+
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-cyan big" onclick="submitQuote()">
+          Run Through Pipeline
+        </button>
+        <button class="btn btn-outline" onclick="fillRandom()">
+          Fill Random
+        </button>
+      </div>
+    </div>
+
+    <!-- Result panel -->
+    <div id="result-panel" class="card result-card hidden">
+      <div class="card-title">Pipeline Result</div>
+
+      <!-- Decision banner -->
+      <div id="decision-banner" class="decision-banner"></div>
+
+      <!-- Score row -->
+      <div class="score-row">
+        <div class="score-box">
+          <div class="score-label">Risk Tier</div>
+          <div id="res-risk" class="score-val">—</div>
+        </div>
+        <div class="score-box">
+          <div class="score-label">Bind Score</div>
+          <div id="res-bind" class="score-val">—</div>
+        </div>
+        <div class="score-box">
+          <div class="score-label">Premium Flag</div>
+          <div id="res-flag" class="score-val">—</div>
+        </div>
+        <div class="score-box">
+          <div class="score-label">Premium Ratio</div>
+          <div id="res-ratio" class="score-val">—</div>
+        </div>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="bind-bar-wrap">
+        <span class="bind-bar-label">Bind Probability</span>
+        <div class="bind-bar-bg">
+          <div id="bind-bar-fill" class="bind-bar-fill"></div>
+        </div>
+        <span id="bind-bar-pct" class="bind-bar-pct">0%</span>
+      </div>
+
+      <!-- LLM reasoning -->
+      <div class="section-label">Premium Advisor Reasoning (Llama 3.1)</div>
+      <div id="res-reasoning" class="reasoning-box">—</div>
+
+      <!-- LLM summary (escalation) -->
+      <div id="summary-wrap" class="hidden">
+        <div class="section-label">Escalation Summary</div>
+        <div id="res-summary" class="reasoning-box escalate-box">—</div>
+      </div>
+
+      <!-- SHAP charts -->
+      <div class="charts-row-small">
+        <div>
+          <div class="section-label">Risk SHAP</div>
+          <img id="risk-shap-img" src="" class="shap-img hidden" alt="Risk SHAP"/>
+        </div>
+        <div>
+          <div class="section-label">Conversion SHAP</div>
+          <img id="conv-shap-img" src="" class="shap-img hidden" alt="Conv SHAP"/>
+        </div>
+      </div>
+
+      <!-- Audit trail -->
+      <div class="section-label">Audit Trail</div>
+      <div id="audit-trail" class="audit-box"></div>
+    </div>
+
+    <!-- Loading spinner -->
+    <div id="loading-panel" class="card loading-card hidden">
+      <div class="spinner"></div>
+      <p>Running 4 agents...</p>
+      <div class="agent-steps">
+        <div class="agent-step" id="step1">Agent 1 — Risk Profiler (XGBoost)</div>
+        <div class="agent-step" id="step2">Agent 2 — Conversion Predictor (LightGBM)</div>
+        <div class="agent-step" id="step3">Agent 3 — Premium Advisor (Llama 3.1)</div>
+        <div class="agent-step" id="step4">Agent 4 — Decision Router</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════ ESCALATION TAB ══════════════════════════ -->
+<div id="tab-escalation" class="tab-content">
+  <div class="card">
+    <div class="card-title">
+      Escalation Queue
+      <button class="btn btn-outline small" onclick="loadEscalation()" style="margin-left:12px">Refresh</button>
+    </div>
+    <div class="table-wrap">
+      <table id="esc-table">
+        <thead>
+          <tr>
+            <th>Quote ID</th>
+            <th>Risk</th>
+            <th>Bind</th>
+            <th>Flag</th>
+            <th>Reason</th>
+            <th>LLM Summary</th>
+          </tr>
+        </thead>
+        <tbody id="esc-body">
+          <tr><td colspan="6" class="empty-msg">No escalations yet</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════ ABOUT TAB ═══════════════════════════════ -->
+<div id="tab-about" class="tab-content">
+  <div class="about-grid">
+    <div class="about-card" style="border-color:#00e5ff">
+      <div class="about-num" style="color:#00e5ff">01</div>
+      <div class="about-title">Risk Profiler</div>
+      <div class="about-model">XGBoost 2.0</div>
+      <p>Analyses accident history, citations, driving experience, age, vehicle usage. Outputs LOW / MEDIUM / HIGH risk tier with SHAP explanation.</p>
+      <div class="about-badge" style="background:rgba(0,229,255,0.1);color:#00e5ff">FULLY AUTOMATIC</div>
+    </div>
+    <div class="about-card" style="border-color:#f59e0b">
+      <div class="about-num" style="color:#f59e0b">02</div>
+      <div class="about-title">Conversion Predictor</div>
+      <div class="about-model">LightGBM + SMOTE</div>
+      <p>Scores each unbound quote 0–100% bind probability. 3-layer imbalance fix handles the 22% class skew. Outputs bind score with SHAP.</p>
+      <div class="about-badge" style="background:rgba(245,158,11,0.1);color:#f59e0b">FULLY AUTOMATIC</div>
+    </div>
+    <div class="about-card" style="border-color:#7c3aed">
+      <div class="about-num" style="color:#7c3aed">03</div>
+      <div class="about-title">Premium Advisor</div>
+      <div class="about-model">Llama 3.1 8B (Ollama)</div>
+      <p>Reasons whether the quoted premium is a conversion blocker by comparing it to the customer's salary bracket. Uses chain-of-thought LLM reasoning. No API key required.</p>
+      <div class="about-badge" style="background:rgba(124,58,237,0.1);color:#7c3aed">HYBRID</div>
+    </div>
+    <div class="about-card" style="border-color:#ef4444">
+      <div class="about-num" style="color:#ef4444">04</div>
+      <div class="about-title">Decision Router</div>
+      <div class="about-model">Rules + Llama 3.1</div>
+      <p>Combines all upstream outputs. Routes to Auto-Approve (~45%), Follow-Up (~35%), or Escalate (~20%). Only escalations ever touch a human underwriter.</p>
+      <div class="about-badge" style="background:rgba(239,68,68,0.1);color:#ef4444">ESCALATE-ONLY</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:24px">
+    <div class="card-title">Tech Stack</div>
+    <div class="stack-pills">
+      <span class="stack-pill" style="--c:#00e5ff">LangGraph</span>
+      <span class="stack-pill" style="--c:#f59e0b">LightGBM</span>
+      <span class="stack-pill" style="--c:#00e5ff">XGBoost</span>
+      <span class="stack-pill" style="--c:#10b981">SMOTE</span>
+      <span class="stack-pill" style="--c:#7c3aed">Llama 3.1 8B</span>
+      <span class="stack-pill" style="--c:#ff6b35">Ollama</span>
+      <span class="stack-pill" style="--c:#f59e0b">SHAP</span>
+      <span class="stack-pill" style="--c:#10b981">FastAPI</span>
+      <span class="stack-pill" style="--c:#00e5ff">Vanilla JS</span>
+      <span class="stack-pill" style="--c:#ff6b35">Chart.js</span>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

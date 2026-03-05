@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+pandas
+numpy
+scikit-learn
+xgboost
+lightgbm
+imbalanced-learn
+shap
+matplotlib
+langgraph
+langchain
+langchain-community
+requests
+python-multipart
